@@ -144,6 +144,44 @@ ALTER SEQUENCE public.activities_id_seq OWNED BY public.activities.id;
 
 
 --
+-- Name: addresses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.addresses (
+    id integer NOT NULL,
+    name character varying(255),
+    supporter_id integer,
+    deleted boolean,
+    address character varying(255),
+    city character varying(255),
+    zip_code character varying(255),
+    country character varying(255),
+    state_code character varying(255),
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: addresses_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.addresses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: addresses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.addresses_id_seq OWNED BY public.addresses.id;
+
+
+--
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -761,7 +799,8 @@ CREATE TABLE public.donations (
     date timestamp without time zone,
     queued_for_import_at timestamp without time zone,
     direct_debit_detail_id integer,
-    payment_provider character varying(255)
+    payment_provider character varying(255),
+    address_id integer
 );
 
 
@@ -2128,7 +2167,8 @@ CREATE TABLE public.tickets (
     note text,
     event_discount_id integer,
     deleted boolean,
-    source_token_id uuid
+    source_token_id uuid,
+    address_id integer
 );
 
 
@@ -2252,6 +2292,13 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 --
 
 ALTER TABLE ONLY public.activities ALTER COLUMN id SET DEFAULT nextval('public.activities_id_seq'::regclass);
+
+
+--
+-- Name: addresses id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.addresses ALTER COLUMN id SET DEFAULT nextval('public.addresses_id_seq'::regclass);
 
 
 --
@@ -2616,6 +2663,14 @@ ALTER TABLE ONLY public.trackings ALTER COLUMN id SET DEFAULT nextval('public.tr
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: addresses addresses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.addresses
+    ADD CONSTRAINT addresses_pkey PRIMARY KEY (id);
 
 
 --
@@ -3121,6 +3176,27 @@ CREATE INDEX index_activities_on_supporter_id ON public.activities USING btree (
 
 
 --
+-- Name: index_addresses_on_deleted; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_addresses_on_deleted ON public.addresses USING btree (deleted);
+
+
+--
+-- Name: index_addresses_on_name; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_addresses_on_name ON public.addresses USING btree (name);
+
+
+--
+-- Name: index_addresses_on_supporter_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_addresses_on_supporter_id ON public.addresses USING btree (supporter_id);
+
+
+--
 -- Name: index_campaign_gifts_on_campaign_gift_option_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3139,6 +3215,13 @@ CREATE INDEX index_cards_on_id_and_holder_type_and_holder_id_and_inactive ON pub
 --
 
 CREATE INDEX index_charges_on_payment_id ON public.charges USING btree (payment_id);
+
+
+--
+-- Name: index_donations_on_address_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_donations_on_address_id ON public.donations USING btree (address_id);
 
 
 --
@@ -3237,6 +3320,13 @@ CREATE INDEX index_supporters_on_import_id ON public.supporters USING btree (imp
 --
 
 CREATE INDEX index_supporters_on_name ON public.supporters USING btree (name);
+
+
+--
+-- Name: index_tickets_on_address_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tickets_on_address_id ON public.tickets USING btree (address_id);
 
 
 --
@@ -4326,4 +4416,10 @@ INSERT INTO schema_migrations (version) VALUES ('20180713213748');
 INSERT INTO schema_migrations (version) VALUES ('20180713215825');
 
 INSERT INTO schema_migrations (version) VALUES ('20180713220028');
+
+INSERT INTO schema_migrations (version) VALUES ('20180808213858');
+
+INSERT INTO schema_migrations (version) VALUES ('20180808214318');
+
+INSERT INTO schema_migrations (version) VALUES ('20180808214449');
 
